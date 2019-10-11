@@ -1,0 +1,65 @@
+{
+    "Sound": {
+        "Spectrogram_Dim": 1025,
+        "Mel_Dim": 80,
+        "Frame_Length": 20,
+        "Frame_Shift": 10,
+        "Sample_Rate": 16000,
+        "Max_Abs_Mel": 4
+    },
+
+    "Token_JSON_Path": "Token_Index_Dict.json",
+
+    "Batch_Normalization": {
+        "Momentum": 0.99,
+        "Epsilon": 1e-3
+        },
+
+    "Prenet": {
+        "Nums": 2,
+        "Conv": {            
+            "Channel": [1024, 1024],
+            "Kernel": [41, 21],
+            "Strides": [2, 2]
+            },
+        "Dropout": {
+            "Rate": 0.0
+            }
+        },
+
+    "Use_Transformer": false,
+
+    "BiLSTM": {
+        "Nums": 3,
+        "Uni_Direction_Cell_Size": 2560,
+        "Zoneout_Rate": 0.0
+        },
+
+    "Transformer": {
+        "Nums": 3,
+        "Size": 2560,
+        "Dropout_Rate": 0.0
+        },
+
+    "Train": {
+        "Pattern_Path": "E:/STT.Pattern",
+        "Metadata_File": "METADATA.PICKLE",
+        "Batch_Size": 7,
+        "Pattern_Sorting": true,
+        "Min_Wav_Length": 500,
+        "Max_Wav_Length": 12000,
+        "Max_Pattern_Queue": 20,
+        "Label_Smoothing": null,
+        "Learning_Rate": 1e-4,
+        "ADAM": {
+            "Beta1": 0.9,
+            "Beta2": 0.999,
+            "Epsilon": 1e-6
+        },
+        "Inference_Timing": 1000,
+        "Checkpoint_Save_Timing": 1000
+    },
+
+    "Inference_Path": "E:/STT_Trial/Inference",
+    "Checkpoint_Path": "E:/STT_Trial/Checkpoint"
+}
