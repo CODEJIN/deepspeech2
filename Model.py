@@ -1,7 +1,3 @@
-# Deepspeech 2 replication으로 변경합니다.
-# https://github.com/tensorflow/models/blob/master/research/deep_speech/deep_speech_model.py
-# 이후 Transformer 적용을 시도해 볼것
-
 import tensorflow as tf
 import numpy as np
 import json, os, time
@@ -17,7 +13,7 @@ import Modules
 with open('Hyper_Parameters.json', 'r') as f:
     hp_Dict = json.load(f)
 
-class STT:
+class DeepSpeech2:
     def __init__(self, is_Training= False):
         self.is_Training = is_Training
 
@@ -158,6 +154,6 @@ class STT:
         return many_to_One_Str, raw_Str
 
 if __name__ == '__main__':
-    new_STT = STT(is_Training= True)
-    new_STT.Restore()
-    new_STT.Train()
+    new_Model = DeepSpeech2(is_Training= True)
+    new_Model.Restore()
+    new_Model.Train()

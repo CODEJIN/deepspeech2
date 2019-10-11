@@ -72,15 +72,23 @@ class Stacked_Transformer(tf.keras.Model):
 
         self.layer_Dict = {}
         for transformer_Index in range(hp_Dict['Transformer']['Nums']):
-            self.layer_Dict['Layer{}'.format(transformer_Index)] = Multi_Head_Attention(
-                num_heads= 1,
-                size_per_head= hp_Dict['Transformer']['Size']
+            for input_Type in ['Query', 'Key']:
+                self.layer_Dict['Layer{}_{}'.format(transformer_Index, input_Type)] = tf.keras.layers.Dense(
+                    units= hp_Dict['Transformer']['Size'],
+                    use_bias= True,
+                    )
+            self.layer_Dict['Layer{}_Attention'.format(transformer_Index)] = tf.keras.layers.Attention(
+                use_scale= True,
+                causal= False
                 )
 
-    def call(self, inputs, training):
+    def call(self, inputs):
         new_Tensor = inputs
         for transformer_Index in range(hp_Dict['Transformer']['Nums']):
-            new_Tensor = self.layer_Dict['Layer{}'.format(transformer_Index)](new_Tensor, new_Tensor, training)                
+            new_Tensor = self.layer_Dict['Layer{}_Attention'.format(transformer_Index)]([
+                self.layer_Dict['Layer{}_Query'.format(transformer_Index)](inputs),
+                self.layer_Dict['Layer{}_Key'.format(transformer_Index)](inputs),
+                ])
         return new_Tensor
 
 class Postnet(tf.keras.layers.Layer):   #it is same to dense now.
@@ -94,74 +102,3 @@ class Postnet(tf.keras.layers.Layer):   #it is same to dense now.
 
     def call(self, inputs):        
         return self.layer(inputs)
-
-#Refer: https://github.com/google-research/bert/blob/master/modeling.py#L647
-class Multi_Head_Attention(tf.keras.layers.Layer):
-    def __init__(
-        self,
-        num_heads,
-        size_per_head,
-        query_activation= None,
-        key_activation= None,
-        value_activation= None
-        ):        
-        super(Multi_Head_Attention, self).__init__(name= '')
-
-        self.num_heads = num_heads
-        self.size_per_head = size_per_head
-
-        self.layer_Dict = {
-            'Query': tf.keras.layers.Dense(
-                units= num_heads * size_per_head,
-                activation= value_activation,
-                use_bias= True,
-                kernel_initializer= tf.keras.initializers.TruncatedNormal()
-                ),
-            'Key': tf.keras.layers.Dense(
-                units= num_heads * size_per_head,
-                activation= value_activation,
-                use_bias= True,
-                kernel_initializer= tf.keras.initializers.TruncatedNormal()
-                ),
-            'Value': tf.keras.layers.Dense(
-                units= num_heads * size_per_head,
-                activation= value_activation,
-                use_bias= True,
-                kernel_initializer= tf.keras.initializers.TruncatedNormal()
-                )
-            }
-
-    def call(self, from_tensor, to_tensor):
-        '''
-        from_tensor: [Batch, From_Time, From_Dim]
-        to_tensor: [Batch, To_Time, To_Dim]
-        '''
-        query_Tensor = self.layer_Dict['Query'](from_tensor)    #[Batch, From_T, Head * Size]
-        key_Tensor = self.layer_Dict['Key'](to_tensor)  #[Batch, To_T, Head * Size]
-        value_Tensor = self.layer_Dict['Value'](to_tensor)  #[Batch, To_T, Head * Size]
-
-        query_Tensor = self.reshape_for_score(query_Tensor)   #[Batch, Head, From_T, Size]
-        key_Tensor = self.reshape_for_score(key_Tensor)   #[Batch, Head, To_T, Size]
-        value_Tensor = self.reshape_for_score(value_Tensor)   #[Batch, Head, To_T, Size]
-
-        attention_Score = tf.matmul(query_Tensor, key_Tensor, transpose_b= True)    #[Batch, Head, From_T, To_T]
-        attention_Score *= 1.0 / tf.sqrt(tf.cast(self.size_per_head, tf.float32))
-        
-
-    def reshape_to_matrix(self, inputs):
-        '''
-        inputs: [Batch, Time, Dim]
-
-        return: [Batch*Time, Dim]
-        '''
-        dim = inputs.get_shape()[-1]
-        return tf.reshape(inputs, [-1, dim])
-
-    def reshape_for_score(self, inputs):        
-        new_Tensor = tf.reshape(
-            inputs,
-            [tf.shape(inputs)[0], tf.shape(inputs)[1], self.num_heads, self.size_per_head]
-            )
-        new_Tensor = tf.transpose(new_Tensor, [0, 2, 1, 3])
-
-        return new_Tensor

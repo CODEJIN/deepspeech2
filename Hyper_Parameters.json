@@ -27,7 +27,7 @@
             }
         },
 
-    "Use_Transformer": false,
+    "Use_Transformer": true,
 
     "BiLSTM": {
         "Nums": 3,
@@ -44,12 +44,11 @@
     "Train": {
         "Pattern_Path": "E:/STT.Pattern",
         "Metadata_File": "METADATA.PICKLE",
-        "Batch_Size": 7,
+        "Batch_Size":64,
         "Pattern_Sorting": true,
         "Min_Wav_Length": 500,
         "Max_Wav_Length": 12000,
         "Max_Pattern_Queue": 20,
-        "Label_Smoothing": null,
         "Learning_Rate": 1e-4,
         "ADAM": {
             "Beta1": 0.9,
