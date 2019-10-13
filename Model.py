@@ -47,7 +47,7 @@ class DeepSpeech2:
         experimental_relax_shapes= True
         )
     def Train_Step(self, mels, mel_lengths, tokens, token_lengths):
-        with tf.GradientTape() as tape:            
+        with tf.GradientTape() as tape:
             logits = self.model(inputs= mels, training= True)
             loss = tf.reduce_mean(tf.nn.ctc_loss(
                 labels= tokens,

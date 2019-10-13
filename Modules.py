@@ -86,8 +86,8 @@ class Stacked_Transformer(tf.keras.Model):
         new_Tensor = inputs
         for transformer_Index in range(hp_Dict['Transformer']['Nums']):
             new_Tensor = self.layer_Dict['Layer{}_Attention'.format(transformer_Index)]([
-                self.layer_Dict['Layer{}_Query'.format(transformer_Index)](inputs),
-                self.layer_Dict['Layer{}_Key'.format(transformer_Index)](inputs),
+                self.layer_Dict['Layer{}_Query'.format(transformer_Index)](new_Tensor),
+                self.layer_Dict['Layer{}_Key'.format(transformer_Index)](new_Tensor),
                 ])
         return new_Tensor
 
